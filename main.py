@@ -3,6 +3,17 @@ from unidecode import unidecode
 from constants import *
 import uuid
 
+class Coordinate:
+    def __init__(self, x: int, y: int):
+        self.x = x
+        self.y = y
+    
+    def get_x(self) -> int:
+        return self.x
+
+    def get_y(self) -> int:
+        return self.y
+
 
 def generate(portrait_path: str = None, first_name: str = '', last_name: str = '', bounty: int = 0,
              output_poster_path: str = None, vertical_align: str = "center", horizontal_align: str = "center") -> str:
@@ -20,8 +31,6 @@ def generate(portrait_path: str = None, first_name: str = '', last_name: str = '
 
     # Open poster template
     poster_template = Image.open(BOUNTY_POSTER_TEMPLATE_PATH).convert("RGBA")
-    # Get poster template size
-    poster_template_width, poster_template_height = poster_template.size
 
     # Create a new image with the same size as the template
     new_image = Image.new("RGB", poster_template.size)
@@ -29,39 +38,17 @@ def generate(portrait_path: str = None, first_name: str = '', last_name: str = '
     # Get portrait image
     if portrait_path is None:
         portrait_path = BOUNTY_POSTER_NO_PHOTO_PATH
+        vertical_align = "center"
+        horizontal_align = "center"
 
     # Open portrait image
     portrait = Image.open(portrait_path)
-    # Get portrait size
-    portrait_width, portrait_height = portrait.size
-
-    # Get where profile image should be placed
-    if portrait_path == BOUNTY_POSTER_NO_PHOTO_PATH:
-        # Excess photo parts should be evenly cropped from top and bottom
-        delta = portrait_height - BOUNTY_POSTER_IMAGE_BOX_H
-        portrait_y = BOUNTY_POSTER_IMAGE_BOX_START_Y - int(delta / 2)
-    else:
-        # Excess photo parts should be cropped from bottom
-        portrait_y = BOUNTY_POSTER_IMAGE_BOX_START_Y
-
-    # Calculate the portrait's x coordinate based on the desired alignment
-    if horizontal_align == "left":
-        portrait_x = 0
-    elif horizontal_align == "center":
-        portrait_x = int((poster_template_width - portrait_width) / 2)
-    else:  # right
-        portrait_x = poster_template_width - portrait_width
-
-    # Adjust the portrait's y coordinate based on the desired alignment
-    if vertical_align == "top":
-        portrait_y = 0
-    elif vertical_align == "center":
-        portrait_y = int((poster_template_height - portrait_height) / 2)
-    else:  # bottom
-        portrait_y = poster_template_height - portrait_height
-
+    
+    # Align portrait image
+    portrait_coordinate = align_image(portrait, vertical_align, horizontal_align)
+    
     # Paste portrait into the new image
-    new_image.paste(portrait, (portrait_x, portrait_y))
+    new_image.paste(portrait, (portrait_coordinate.get_x(), portrait_coordinate.get_y()))
 
     # Paste poster template into the new image
     new_image.paste(poster_template, (0, 0), mask=poster_template)
@@ -86,10 +73,38 @@ def generate(portrait_path: str = None, first_name: str = '', last_name: str = '
     save_path = output_poster_path
     new_image.save(save_path)
 
-
-
     return save_path
 
+
+def align_image(portrait: Image, vertical_align: str, horizontal_align: str) -> Coordinate:
+    """
+    Calculate the portrait's coordinate based on the desired alignment
+    :param portrait: Image to align
+    :param vertical_align: The vertical alignment of the portrait image (top, center, bottom)
+    :param horizontal_align: The horizontal alignment of the portrait image (left, center, right)
+    :return: The portrait's start coordinate 
+    """
+
+    # Get portrait size
+    portrait_width, portrait_height = portrait.size
+
+    # Calculate the portrait's x coordinate based on the desired alignment
+    if horizontal_align == "left":
+        portrait_x = BOUNTY_POSTER_IMAGE_BOX_START_X
+    elif horizontal_align == "center":
+        portrait_x = int((BOUNTY_POSTER_IMAGE_BOX_W - portrait_width) / 2) + BOUNTY_POSTER_IMAGE_BOX_START_X
+    else:  # right
+        portrait_x = BOUNTY_POSTER_IMAGE_BOX_W - portrait_width + BOUNTY_POSTER_IMAGE_BOX_START_X
+
+    # Adjust the portrait's y coordinate based on the desired alignment
+    if vertical_align == "top":
+        portrait_y = BOUNTY_POSTER_IMAGE_BOX_START_Y
+    elif vertical_align == "center":
+        portrait_y = int((BOUNTY_POSTER_IMAGE_BOX_H - portrait_height) / 2) + BOUNTY_POSTER_IMAGE_BOX_START_Y
+    else:  # bottom
+        portrait_y = BOUNTY_POSTER_IMAGE_BOX_H - portrait_height + BOUNTY_POSTER_IMAGE_BOX_START_Y
+
+    return Coordinate(portrait_x, portrait_y)
 
 def get_bounty_poster_name(first_name: str, last_name: str) -> str:
     """
