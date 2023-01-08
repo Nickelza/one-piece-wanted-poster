@@ -3,6 +3,7 @@ from unidecode import unidecode
 from constants import *
 import uuid
 
+
 class Coordinate:
     def __init__(self, x: int, y: int):
         self.x = x
@@ -43,6 +44,8 @@ def generate(portrait_path: str = None, first_name: str = '', last_name: str = '
 
     # Open portrait image
     portrait = Image.open(portrait_path)
+    # Resize portrait
+    # portrait = resize_portrait(portrait)
     
     # Align portrait image
     portrait_coordinate = align_image(portrait, vertical_align, horizontal_align)
@@ -105,6 +108,45 @@ def align_image(portrait: Image, vertical_align: str, horizontal_align: str) -> 
         portrait_y = BOUNTY_POSTER_IMAGE_BOX_H - portrait_height + BOUNTY_POSTER_IMAGE_BOX_START_Y
 
     return Coordinate(portrait_x, portrait_y)
+
+
+def resize_portrait(portrait: Image) -> Image:
+    """
+    Resizes a portrait image to fit the wanted poster
+    :param portrait: The portrait image
+    :return: The resized portrait image
+    """
+
+    # Get portrait size
+    portrait_width, portrait_height = portrait.size
+
+    # Calculate wanted poster image box aspect ratio
+    image_box_aspect_ratio = BOUNTY_POSTER_IMAGE_BOX_W / BOUNTY_POSTER_IMAGE_BOX_H
+
+    # Calculate portrait aspect ratio
+    portrait_aspect_ratio = portrait_width / portrait_height
+
+    if portrait_aspect_ratio > image_box_aspect_ratio:
+        # Portrait is wider than the wanted poster image box
+        # Resize portrait to fit the width of the wanted poster image box
+        new_width = BOUNTY_POSTER_IMAGE_BOX_W
+        new_height = int(new_width / portrait_aspect_ratio)
+    elif portrait_aspect_ratio < image_box_aspect_ratio:
+        # Portrait is taller than the wanted poster image box
+        # Resize portrait to fit the height of the wanted poster image box
+        new_height = BOUNTY_POSTER_IMAGE_BOX_H
+        new_width = int(new_height * portrait_aspect_ratio)
+    else:
+        # Portrait has the same aspect ratio as the wanted poster image box
+        # Resize portrait to fit the wanted poster image box
+        new_width = BOUNTY_POSTER_IMAGE_BOX_W
+        new_height = BOUNTY_POSTER_IMAGE_BOX_H
+
+    # Resize portrait
+    portrait = portrait.resize((new_width, new_height), Image.ANTIALIAS)
+
+    return portrait
+
 
 def get_bounty_poster_name(first_name: str, last_name: str) -> str:
     """
