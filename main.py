@@ -1,14 +1,19 @@
 from PIL import Image, ImageFont, ImageDraw
 from unidecode import unidecode
 from constants import *
+import uuid
 
 
-def main(first_name: str, last_name: str, photo_path: str, bounty: int) -> str:
+def generate(portrait_path: str = None, first_name: str = '', last_name: str = '', bounty: int = 0,
+             output_poster_path: str = None) -> str:
     """
-    Gets the bounty poster of a user
-    :param update: Telegram update
-    :param user: The user to get the poster of
-    :return: The poster of the bounty
+    Generates a wanted poster
+    :param portrait_path: The path to the portrait image
+    :param first_name: The first name of the user
+    :param last_name: The last name of the user
+    :param bounty: The bounty of the user
+    :param output_poster_path: The path to the output poster. If None, a temporary file will be created
+    :return: The path to the generated wanted poster
     """
 
     # Open poster template
@@ -19,17 +24,17 @@ def main(first_name: str, last_name: str, photo_path: str, bounty: int) -> str:
     # Create a new image with the same size as the template
     new_image = Image.new("RGB", poster_template.size)
 
-    # Get profile photo of user
-    if photo_path is None:
-        photo_path = BOUNTY_POSTER_NO_PHOTO_PATH
+    # Get portrait image
+    if portrait_path is None:
+        portrait_path = BOUNTY_POSTER_NO_PHOTO_PATH
 
-    # Add profile photo
-    photo = Image.open(photo_path)
-    # Get profile photo size
-    photo_width, photo_height = photo.size
+    # Open portrait image
+    portrait = Image.open(portrait_path)
+    # Get portrait size
+    portrait_width, photo_height = portrait.size
 
     # Get where profile image should be placed
-    if photo_path == BOUNTY_POSTER_NO_PHOTO_PATH:
+    if portrait_path == BOUNTY_POSTER_NO_PHOTO_PATH:
         # Excess photo parts should be evenly cropped from top and bottom
         delta = photo_height - BOUNTY_POSTER_IMAGE_BOX_H
         photo_y = BOUNTY_POSTER_IMAGE_BOX_START_Y - int(delta / 2)
@@ -37,26 +42,32 @@ def main(first_name: str, last_name: str, photo_path: str, bounty: int) -> str:
         # Excess photo parts should be cropped from bottom
         photo_y = BOUNTY_POSTER_IMAGE_BOX_START_Y
 
-    # Profile photo should be placed in the center of the poster template
-    photo_x = int((poster_template_width - photo_width) / 2)
-    # Paste profile image into the new image
-    new_image.paste(photo, (photo_x, photo_y))
+    # Portrait should be placed in the center of the poster template
+    photo_x = int((poster_template_width - portrait_width) / 2)
+    # Paste portrait into the new image
+    new_image.paste(portrait, (photo_x, photo_y))
 
     # Paste poster template into the new image
     new_image.paste(poster_template, (0, 0), mask=poster_template)
 
     # Add name component
-    full_name = get_bounty_poster_name(user)
+    full_name = get_bounty_poster_name(first_name, last_name)
     name_component: Image = get_bounty_poster_component(full_name, BOUNTY_POSTER_COMPONENT_NAME)
     new_image.paste(name_component, (0, BOUNTY_POSTER_NAME_START_Y), name_component)
 
     # Add belly component
-    belly = user.get_bounty_formatted() + '-'
+    belly = '{0:,}'.format(bounty) + '-'
+
     belly_component: Image = get_bounty_poster_component(belly, BOUNTY_POSTER_COMPONENT_BELLY)
     new_image.paste(belly_component, (0, BOUNTY_POSTER_BELLY_START_Y), belly_component)
 
     # Save image
-    save_path = generate_temp_file_path(BOUNTY_POSTER_EXTENSION)
+
+    # If output path is not specified, create a temporary file in the current directory
+    if output_poster_path is None:
+        output_poster_path = uuid.uuid4().hex + '.jpg'
+
+    save_path = output_poster_path
     new_image.save(save_path)
 
     return save_path
@@ -75,8 +86,7 @@ def get_bounty_poster_name(first_name: str, last_name: str) -> str:
     last_name = unidecode(last_name).upper().strip()
 
     # Get full name
-    full_name = first_name + " " + last_name
-    full_name = full_name_preprocessing(first_name, full_name)
+    full_name = get_full_name(first_name, last_name)
 
     # Add space sub if too long or D. in name
     if len(full_name) >= BOUNTY_POSTER_NAME_SPACE_SUB_MIN_LENGTH or 'D.' in full_name:
@@ -167,13 +177,16 @@ def get_bounty_poster_component(text: str, c_type: int) -> Image:
 
     return texture_background
 
-def full_name_preprocessing(first_name: str, full_name: str) -> str:
+
+def get_full_name(first_name: str, last_name: str) -> str:
     """
-    Preprocesses the user name to be up to BOUNTY_POSTER_NAME_MAX_LENGTH characters long
-    :param first_name: The user first_name to get the poster's name of
-    :param full_name: The user full_name to get the poster's name of
-    :return: String of up to BOUNTY_POSTER_NAME_MAX_LENGTH characters representing the user's name
+    Preprocesses the name to be up to a maximum length
+    :param first_name: The first name
+    :param last_name: The last name
+    :return: The full name
     """
+
+    full_name = first_name + " " + last_name
 
     if len(full_name) <= BOUNTY_POSTER_NAME_MAX_LENGTH:
         return full_name
