@@ -62,49 +62,21 @@ def main(first_name: str, last_name: str, photo_path: str, bounty: int) -> str:
     return save_path
 
 
-def get_bounty_poster_name(user: User) -> str:
+def get_bounty_poster_name(first_name: str, last_name: str) -> str:
     """
     Gets the bounty poster's name of a user
-    :param user: The user to get the poster's name of
+    :param first_name: The user first_name to get the poster's name of
+    :param last_name: The user last_name to get the poster's name of
     :return: The name to display on the bounty poster
     """
-
-    # Set values
-    first_name = user.tg_first_name if user.tg_first_name is not None else ''
-    last_name = user.tg_last_name if user.tg_last_name is not None else ''
 
     # Normalize to ascii
     first_name = unidecode(first_name).upper().strip()
     last_name = unidecode(last_name).upper().strip()
 
     # Get full name
-    full_name = (first_name + ' ' + last_name).strip()
-
-    while True:  # Should run only once
-        if len(full_name) <= BOUNTY_POSTER_NAME_MAX_LENGTH:
-            break
-
-        # Use first name only
-        full_name = first_name
-        if len(full_name) <= BOUNTY_POSTER_NAME_MAX_LENGTH:
-            break
-
-        # Still too long, split by 'space' and concatenate till it's not too long
-        parts = full_name.split(' ')
-        result = ''
-        for part in parts:
-            if len(result + ' ' + part) > BOUNTY_POSTER_NAME_MAX_LENGTH:
-                break
-            result += ' ' + part
-
-        # Use result or only the first part
-        full_name = parts[0] if len(result) == 0 else result
-        if len(full_name) <= BOUNTY_POSTER_NAME_MAX_LENGTH:
-            break
-
-        # Still too long, remove extra characters
-        full_name = full_name[:(BOUNTY_POSTER_NAME_MAX_LENGTH - 2)] + '.'
-        break
+    full_name = first_name + " " + last_name
+    full_name = full_name_preprocessing(first_name, full_name)
 
     # Add space sub if too long or D. in name
     if len(full_name) >= BOUNTY_POSTER_NAME_SPACE_SUB_MIN_LENGTH or 'D.' in full_name:
@@ -195,3 +167,35 @@ def get_bounty_poster_component(text: str, c_type: int) -> Image:
 
     return texture_background
 
+def full_name_preprocessing(first_name: str, full_name: str) -> str:
+    """
+    Preprocesses the user name to be up to BOUNTY_POSTER_NAME_MAX_LENGTH characters long
+    :param first_name: The user first_name to get the poster's name of
+    :param full_name: The user full_name to get the poster's name of
+    :return: String of up to BOUNTY_POSTER_NAME_MAX_LENGTH characters representing the user's name
+    """
+
+    if len(full_name) <= BOUNTY_POSTER_NAME_MAX_LENGTH:
+        return full_name
+
+    # Use first name only
+    full_name = first_name
+    if len(full_name) <= BOUNTY_POSTER_NAME_MAX_LENGTH:
+        return full_name
+
+    # Still too long, split by 'space' and concatenate till it's not too long
+    parts = full_name.split(' ')
+    result = ''
+    for part in parts:
+        if len(result + ' ' + part) > BOUNTY_POSTER_NAME_MAX_LENGTH:
+            return full_name
+        result += ' ' + part
+
+    # Use result or only the first part
+    full_name = parts[0] if len(result) == 0 else result
+    if len(full_name) <= BOUNTY_POSTER_NAME_MAX_LENGTH:
+        return full_name
+
+    # Still too long, remove extra characters
+    full_name = full_name[:(BOUNTY_POSTER_NAME_MAX_LENGTH - 2)] + '.'
+    return full_name
