@@ -12,7 +12,7 @@ def main():
 
     # Set "Luffy" as first name and "D. Monkey" as last name
     first_name = 'Luffy'
-    last_name = 'D. Monkey'
+    last_name = 'Monkey D.'
 
     # Set bounty amount to 3.000.000.000
     bounty_amount = 3_000_000_000
