@@ -57,7 +57,7 @@ class WantedPoster:
         # Open portrait image
         portrait = Image.open(portrait_path)
         # Resize portrait
-        # portrait = resize_portrait(portrait)
+        portrait = self.resize_portrait(portrait)
 
         # Align portrait image
         portrait_coordinate_x, portrait_coordinate_y = self.align_image(portrait, vertical_align, horizontal_align)
@@ -132,12 +132,12 @@ class WantedPoster:
         # Calculate portrait aspect ratio
         portrait_aspect_ratio = portrait_width / portrait_height
 
-        if portrait_aspect_ratio > image_box_aspect_ratio:
+        if portrait_aspect_ratio < image_box_aspect_ratio:
             # Portrait is wider than the wanted poster image box
             # Resize portrait to fit the width of the wanted poster image box
             new_width = BOUNTY_POSTER_IMAGE_BOX_W
             new_height = int(new_width / portrait_aspect_ratio)
-        elif portrait_aspect_ratio < image_box_aspect_ratio:
+        elif portrait_aspect_ratio > image_box_aspect_ratio:
             # Portrait is taller than the wanted poster image box
             # Resize portrait to fit the height of the wanted poster image box
             new_height = BOUNTY_POSTER_IMAGE_BOX_H
