@@ -3,7 +3,7 @@ import os
 ROOT_DIR = os.path.dirname(__file__)
 
 BOUNTY_POSTER_EXTENSION = 'jpg'
-BOUNTY_POSTER_ASSETS_PATH = os.path.join(ROOT_DIR, 'assets')
+BOUNTY_POSTER_ASSETS_PATH = os.path.join(ROOT_DIR, '../../assets')
 BOUNTY_POSTER_TEMPLATE_PATH = os.path.join(BOUNTY_POSTER_ASSETS_PATH, 'image_components', 'template.png')
 BOUNTY_POSTER_NO_PHOTO_PATH = os.path.join(BOUNTY_POSTER_ASSETS_PATH, 'image_components', 'no_portrait.jpg')
 BOUNTY_POSTER_PORTRAIT_BOX_START_Y = 239
