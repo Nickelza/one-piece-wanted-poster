@@ -2,7 +2,7 @@ Example code:
 
 ```
 import os
-from WantedPoster import WantedPoster
+from wanted_poster import WantedPoster  -->> 1. QQ: 1234567890
 from PIL import Image
 
 

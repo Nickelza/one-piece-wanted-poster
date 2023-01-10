@@ -65,6 +65,12 @@ class WantedPoster:
         # Paste portrait into the new image
         new_image.paste(portrait, (portrait_coordinate_x, portrait_coordinate_y))
 
+        # Paste portrait texture on top of portrait with 50% opacity
+        texture_portrait = Image.open(BOUNTY_POSTER_PORTRAIT_TEXTURE_PATH).convert("RGBA")
+        texture_portrait.putalpha(100)
+        new_image.paste(texture_portrait, (BOUNTY_POSTER_PORTRAIT_BOX_START_X, BOUNTY_POSTER_PORTRAIT_BOX_START_Y),
+                        texture_portrait)
+
         # Paste poster template into the new image
         new_image.paste(poster_template, (0, 0), mask=poster_template)
 
@@ -99,19 +105,19 @@ class WantedPoster:
 
         # Calculate the portrait's x coordinate based on the desired alignment
         if horizontal_align == "left":
-            portrait_x = BOUNTY_POSTER_IMAGE_BOX_START_X
+            portrait_x = BOUNTY_POSTER_PORTRAIT_BOX_START_X
         elif horizontal_align == "center":
-            portrait_x = int((BOUNTY_POSTER_IMAGE_BOX_W - portrait_width) / 2) + BOUNTY_POSTER_IMAGE_BOX_START_X
+            portrait_x = int((BOUNTY_POSTER_PORTRAIT_BOX_W - portrait_width) / 2) + BOUNTY_POSTER_PORTRAIT_BOX_START_X
         else:  # right
-            portrait_x = BOUNTY_POSTER_IMAGE_BOX_W - portrait_width + BOUNTY_POSTER_IMAGE_BOX_START_X
+            portrait_x = BOUNTY_POSTER_PORTRAIT_BOX_W - portrait_width + BOUNTY_POSTER_PORTRAIT_BOX_START_X
 
         # Adjust the portrait's y coordinate based on the desired alignment
         if vertical_align == "top":
-            portrait_y = BOUNTY_POSTER_IMAGE_BOX_START_Y
+            portrait_y = BOUNTY_POSTER_PORTRAIT_BOX_START_Y
         elif vertical_align == "center":
-            portrait_y = int((BOUNTY_POSTER_IMAGE_BOX_H - portrait_height) / 2) + BOUNTY_POSTER_IMAGE_BOX_START_Y
+            portrait_y = int((BOUNTY_POSTER_PORTRAIT_BOX_H - portrait_height) / 2) + BOUNTY_POSTER_PORTRAIT_BOX_START_Y
         else:  # bottom
-            portrait_y = BOUNTY_POSTER_IMAGE_BOX_H - portrait_height + BOUNTY_POSTER_IMAGE_BOX_START_Y
+            portrait_y = BOUNTY_POSTER_PORTRAIT_BOX_H - portrait_height + BOUNTY_POSTER_PORTRAIT_BOX_START_Y
 
         return portrait_x, portrait_y
 
@@ -127,7 +133,7 @@ class WantedPoster:
         portrait_width, portrait_height = portrait.size
 
         # Calculate wanted poster image box aspect ratio
-        image_box_aspect_ratio = BOUNTY_POSTER_IMAGE_BOX_W / BOUNTY_POSTER_IMAGE_BOX_H
+        image_box_aspect_ratio = BOUNTY_POSTER_PORTRAIT_BOX_W / BOUNTY_POSTER_PORTRAIT_BOX_H
 
         # Calculate portrait aspect ratio
         portrait_aspect_ratio = portrait_width / portrait_height
@@ -135,18 +141,18 @@ class WantedPoster:
         if portrait_aspect_ratio < image_box_aspect_ratio:
             # Portrait is wider than the wanted poster image box
             # Resize portrait to fit the width of the wanted poster image box
-            new_width = BOUNTY_POSTER_IMAGE_BOX_W
+            new_width = BOUNTY_POSTER_PORTRAIT_BOX_W
             new_height = int(new_width / portrait_aspect_ratio)
         elif portrait_aspect_ratio > image_box_aspect_ratio:
             # Portrait is taller than the wanted poster image box
             # Resize portrait to fit the height of the wanted poster image box
-            new_height = BOUNTY_POSTER_IMAGE_BOX_H
+            new_height = BOUNTY_POSTER_PORTRAIT_BOX_H
             new_width = int(new_height * portrait_aspect_ratio)
         else:
             # Portrait has the same aspect ratio as the wanted poster image box
             # Resize portrait to fit the wanted poster image box
-            new_width = BOUNTY_POSTER_IMAGE_BOX_W
-            new_height = BOUNTY_POSTER_IMAGE_BOX_H
+            new_width = BOUNTY_POSTER_PORTRAIT_BOX_W
+            new_height = BOUNTY_POSTER_PORTRAIT_BOX_H
 
         # Resize portrait
         portrait = portrait.resize((new_width, new_height), Image.ANTIALIAS)
