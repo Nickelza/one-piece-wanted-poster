@@ -9,8 +9,8 @@ BOUNTY_POSTER_EXTENSION = 'jpg'
 BOUNTY_POSTER_ASSETS_PATH = os.path.join(ROOT_DIR, 'assets')
 BOUNTY_POSTER_TEMPLATE_PATH = os.path.join(BOUNTY_POSTER_ASSETS_PATH, 'image_components', 'template.png')
 BOUNTY_POSTER_NO_PHOTO_PATH = os.path.join(BOUNTY_POSTER_ASSETS_PATH, 'image_components', 'no_portrait.jpg')
-BOUNTY_POSTER_PORTRAIT_BOX_START_Y = 239
-BOUNTY_POSTER_PORTRAIT_BOX_H = 461
+BOUNTY_POSTER_PORTRAIT_BOX_START_Y = 238
+BOUNTY_POSTER_PORTRAIT_BOX_H = 463
 BOUNTY_POSTER_PORTRAIT_BOX_START_X = 73
 BOUNTY_POSTER_PORTRAIT_BOX_W = 640
 BOUNTY_POSTER_PORTRAIT_TEXTURE_PATH = os.path.join(BOUNTY_POSTER_ASSETS_PATH, 'image_components',
@@ -56,13 +56,16 @@ class WantedPoster:
         self.last_name: str = last_name
         self.bounty: int = bounty
 
-    def generate(self, output_poster_path: str = None, vertical_align: str = 'center', horizontal_align: str = 'center'
-                 ) -> str:
+    def generate(self, output_poster_path: str = None, portrait_vertical_align: str = 'center',
+                 portrait_horizontal_align: str = 'center', should_make_portrait_transparent: bool = False,
+                 portrait_transparency_value: int = 200) -> str:
         """
         Generates a wanted poster and saves it to the specified path
         :param output_poster_path: The path to the output poster. If None, a temporary file will be created
-        :param vertical_align: The vertical alignment of the portrait image (top, center, bottom)
-        :param horizontal_align: The horizontal alignment of the portrait image (left, center, right)
+        :param portrait_vertical_align: The vertical alignment of the portrait image (top, center, bottom)
+        :param portrait_horizontal_align: The horizontal alignment of the portrait image (left, center, right)
+        :param should_make_portrait_transparent: Whether to make the portrait semi-transparent
+        :param portrait_transparency_value: The transparency value of the portrait (0-255). Higher = less transparent
         :return: The path to the generated poster
         """
 
@@ -70,10 +73,10 @@ class WantedPoster:
         if output_poster_path is None:
             output_poster_path = uuid.uuid4().hex + '.jpg'
 
-        if vertical_align not in ["top", "center", "bottom"]:
+        if portrait_vertical_align not in ["top", "center", "bottom"]:
             raise ValueError("Invalid vertical_align value")
 
-        if horizontal_align not in ["left", "center", "right"]:
+        if portrait_horizontal_align not in ["left", "center", "right"]:
             raise ValueError("Invalid horizontal_align value")
 
         # Open poster template
@@ -85,10 +88,14 @@ class WantedPoster:
         # Get portrait image
         if self.portrait_path is None:
             portrait_path = BOUNTY_POSTER_NO_PHOTO_PATH
-            vertical_align = "center"
-            horizontal_align = "center"
+            portrait_vertical_align = "center"
+            portrait_horizontal_align = "center"
         else:
             portrait_path = self.portrait_path
+
+        # Paste portrait texture into new image
+        texture_portrait = Image.open(BOUNTY_POSTER_PORTRAIT_TEXTURE_PATH)
+        new_image.paste(texture_portrait, (BOUNTY_POSTER_PORTRAIT_BOX_START_X, BOUNTY_POSTER_PORTRAIT_BOX_START_Y))
 
         # Open portrait image
         portrait = Image.open(portrait_path)
@@ -96,16 +103,16 @@ class WantedPoster:
         portrait = self.resize_portrait(portrait)
 
         # Align portrait image
-        portrait_coordinate_x, portrait_coordinate_y = self.align_image(portrait, vertical_align, horizontal_align)
+        portrait_coordinate_x, portrait_coordinate_y = self.align_image(portrait, portrait_vertical_align,
+                                                                        portrait_horizontal_align)
 
-        # Paste portrait into the new image
-        new_image.paste(portrait, (portrait_coordinate_x, portrait_coordinate_y))
-
-        # Paste portrait texture on top of portrait with 50% opacity
-        texture_portrait = Image.open(BOUNTY_POSTER_PORTRAIT_TEXTURE_PATH).convert("RGBA")
-        texture_portrait.putalpha(100)
-        new_image.paste(texture_portrait, (BOUNTY_POSTER_PORTRAIT_BOX_START_X, BOUNTY_POSTER_PORTRAIT_BOX_START_Y),
-                        texture_portrait)
+        # Paste portrait into new image
+        if should_make_portrait_transparent:
+            portrait.putalpha(portrait_transparency_value)
+            mask = portrait
+        else:
+            mask = None
+        new_image.paste(portrait, (portrait_coordinate_x, portrait_coordinate_y), mask)
 
         # Paste poster template into the new image
         new_image.paste(poster_template, (0, 0), mask=poster_template)
