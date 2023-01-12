@@ -79,19 +79,19 @@ class WantedPoster:
         if portrait_horizontal_align not in ["left", "center", "right"]:
             raise ValueError("Invalid horizontal_align value")
 
-        # Open poster template
-        poster_template = Image.open(BOUNTY_POSTER_TEMPLATE_PATH).convert("RGBA")
-
-        # Create a new image with the same size as the template
-        new_image = Image.new("RGB", poster_template.size)
-
-        # Get portrait image
+        # Set portrait image
         if self.portrait_path is None:
             portrait_path = BOUNTY_POSTER_NO_PHOTO_PATH
             portrait_vertical_align = "center"
             portrait_horizontal_align = "center"
         else:
             portrait_path = self.portrait_path
+
+        # Open poster template
+        poster_template = Image.open(BOUNTY_POSTER_TEMPLATE_PATH).convert("RGBA")
+
+        # Create a new image with the same size as the template
+        new_image = Image.new("RGB", poster_template.size)
 
         # Paste portrait texture into new image
         texture_portrait = Image.open(BOUNTY_POSTER_PORTRAIT_TEXTURE_PATH)

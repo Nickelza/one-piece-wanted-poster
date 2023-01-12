@@ -20,7 +20,7 @@ def main():
     wanted_poster = WantedPoster(portrait_path, first_name, last_name, bounty_amount)
 
     # Generate poster
-    path = wanted_poster.generate()
+    path = wanted_poster.generate(should_make_portrait_transparent=True)
 
     # Show image
     Image.open(path).show()
