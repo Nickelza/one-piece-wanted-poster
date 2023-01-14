@@ -1,5 +1,6 @@
 import os
 import uuid
+from io import BytesIO
 
 from PIL import Image, ImageFont, ImageDraw
 from unidecode import unidecode
@@ -41,17 +42,18 @@ BOUNTY_POSTER_COMPONENT_BELLY = 2
 
 
 class WantedPoster:
-    def __init__(self, portrait_path: str = None, first_name: str = '', last_name: str = '', bounty: int = 0) -> None:
+    def __init__(self, portrait: str | BytesIO = None, first_name: str = '', last_name: str = '', bounty: int = 0
+                 ) -> None:
         """
         Creates a Wanted Poster object
-        :param portrait_path: The path to the portrait image
+        :param portrait: The portrait image, either a path to the image or a BytesIO object
         :param first_name: The first name of the user
         :param last_name: The last name of the user
         :param bounty: The bounty of the user
         :return: None
         """
 
-        self.portrait_path: str = portrait_path
+        self.portrait: str = portrait
         self.first_name: str = first_name
         self.last_name: str = last_name
         self.bounty: int = bounty
@@ -80,12 +82,12 @@ class WantedPoster:
             raise ValueError("Invalid horizontal_align value")
 
         # Set portrait image
-        if self.portrait_path is None:
-            portrait_path = BOUNTY_POSTER_NO_PHOTO_PATH
+        if self.portrait is None:
+            portrait = BOUNTY_POSTER_NO_PHOTO_PATH
             portrait_vertical_align = "center"
             portrait_horizontal_align = "center"
         else:
-            portrait_path = self.portrait_path
+            portrait = self.portrait
 
         # Open poster template
         poster_template = Image.open(BOUNTY_POSTER_TEMPLATE_PATH).convert("RGBA")
@@ -98,7 +100,7 @@ class WantedPoster:
         new_image.paste(texture_portrait, (BOUNTY_POSTER_PORTRAIT_BOX_START_X, BOUNTY_POSTER_PORTRAIT_BOX_START_Y))
 
         # Open portrait image
-        portrait = Image.open(portrait_path)
+        portrait = Image.open(portrait)
         # Resize portrait
         portrait = self.resize_portrait(portrait)
 
