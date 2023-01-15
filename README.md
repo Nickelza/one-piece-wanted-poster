@@ -46,3 +46,9 @@ def main():
 if __name__ == '__main__':
     main()
 ```
+
+### Credits
+
+[AlleCosti95](https://github.com/allecosti95?tab=repositories)
+
+Thanks to ClayStage for providing the original [template](https://claystage.com/one-piece-wanted-poster-template).
