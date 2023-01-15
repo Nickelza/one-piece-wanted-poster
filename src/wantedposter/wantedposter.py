@@ -1,6 +1,7 @@
 import os
 import uuid
 from io import BytesIO
+from typing import Union
 
 from PIL import Image, ImageFont, ImageDraw
 from unidecode import unidecode
@@ -42,7 +43,7 @@ BOUNTY_POSTER_COMPONENT_BELLY = 2
 
 
 class WantedPoster:
-    def __init__(self, portrait: str | BytesIO = None, first_name: str = '', last_name: str = '', bounty: int = 0
+    def __init__(self, portrait: Union[str, BytesIO] = None, first_name: str = '', last_name: str = '', bounty: int = 0
                  ) -> None:
         """
         Creates a Wanted Poster object
