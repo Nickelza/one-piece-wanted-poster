@@ -102,11 +102,11 @@ class WantedPoster:
         # Open portrait image
         portrait = Image.open(portrait)
         # Resize portrait
-        portrait = self.resize_portrait(portrait)
+        portrait = self.__resize_portrait(portrait)
 
         # Align portrait image
-        portrait_coordinate_x, portrait_coordinate_y = self.align_image(portrait, portrait_vertical_align,
-                                                                        portrait_horizontal_align)
+        portrait_coordinate_x, portrait_coordinate_y = self.__align_image(portrait, portrait_vertical_align,
+                                                                          portrait_horizontal_align)
 
         # Paste portrait into new image
         if should_make_portrait_transparent:
@@ -120,13 +120,13 @@ class WantedPoster:
         new_image.paste(poster_template, (0, 0), mask=poster_template)
 
         # Add name component
-        full_name = self.get_bounty_poster_name()
-        name_component: Image = self.get_bounty_poster_component(full_name, BOUNTY_POSTER_COMPONENT_NAME)
+        full_name = self.__get_bounty_poster_name()
+        name_component: Image = self.__get_bounty_poster_component(full_name, BOUNTY_POSTER_COMPONENT_NAME)
         new_image.paste(name_component, (0, BOUNTY_POSTER_NAME_START_Y), name_component)
 
         # Add belly component
         belly = '{0:,}'.format(self.bounty) + '-'
-        belly_component: Image = self.get_bounty_poster_component(belly, BOUNTY_POSTER_COMPONENT_BELLY)
+        belly_component: Image = self.__get_bounty_poster_component(belly, BOUNTY_POSTER_COMPONENT_BELLY)
         new_image.paste(belly_component, (0, BOUNTY_POSTER_BELLY_START_Y), belly_component)
 
         # Save image
@@ -136,7 +136,7 @@ class WantedPoster:
         return save_path
 
     @staticmethod
-    def align_image(portrait: Image, vertical_align: str, horizontal_align: str) -> tuple[int, int]:
+    def __align_image(portrait: Image, vertical_align: str, horizontal_align: str) -> tuple[int, int]:
         """
         Calculate the portrait's coordinate based on the desired alignment
         :param portrait: Image to align
@@ -167,7 +167,7 @@ class WantedPoster:
         return portrait_x, portrait_y
 
     @staticmethod
-    def resize_portrait(portrait: Image) -> Image:
+    def __resize_portrait(portrait: Image) -> Image:
         """
         Resizes a portrait image to fit the wanted poster
         :param portrait: The portrait image
@@ -204,13 +204,13 @@ class WantedPoster:
 
         return portrait
 
-    def get_bounty_poster_name(self) -> str:
+    def __get_bounty_poster_name(self) -> str:
         """
         Gets the bounty poster's name of a user
         """
 
         # Get full name
-        full_name = self.get_full_name()
+        full_name = self.__get_full_name()
 
         # Add space sub if too long or D. in name
         if len(full_name) >= BOUNTY_POSTER_NAME_SPACE_SUB_MIN_LENGTH or 'D.' in full_name:
@@ -222,7 +222,7 @@ class WantedPoster:
         return full_name
 
     @staticmethod
-    def get_bounty_poster_component(text: str, c_type: int) -> Image:
+    def __get_bounty_poster_component(text: str, c_type: int) -> Image:
         """
         Get a component of the poster
         :param text: Text to be written
@@ -301,7 +301,7 @@ class WantedPoster:
 
         return texture_background
 
-    def get_full_name(self) -> str:
+    def __get_full_name(self) -> str:
         """
         Preprocesses the name to be up to a maximum length
         :return: The full name
