@@ -1,7 +1,7 @@
 import os
 import uuid
 from io import BytesIO
-from typing import Union
+from typing import Union, Tuple
 
 from PIL import Image, ImageFont, ImageDraw
 from unidecode import unidecode
@@ -137,7 +137,7 @@ class WantedPoster:
         return save_path
 
     @staticmethod
-    def __align_image(portrait: Image, vertical_align: str, horizontal_align: str) -> tuple[int, int]:
+    def __align_image(portrait: Image, vertical_align: str, horizontal_align: str) -> Tuple[int, int]:
         """
         Calculate the portrait's coordinate based on the desired alignment
         :param portrait: Image to align
