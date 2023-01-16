@@ -24,7 +24,7 @@ BOUNTY_POSTER_NAME_START_X = 95
 BOUNTY_POSTER_NAME_START_Y = 802
 BOUNTY_POSTER_NAME_END_Y = 911
 BOUNTY_POSTER_NAME_MAX_KERN = 65
-BOUNTY_POSTER_NAME_MAX_LENGTH = 16
+BOUNTY_POSTER_NAME_OPTIMAL_MAX_LENGTH = 16
 BOUNTY_POSTER_NAME_SPACE_SUB_MIN_LENGTH = 14
 BOUNTY_POSTER_NAME_SPACE_SUB_CHAR = '•'
 BOUNTY_POSTER_NAME_TEXTURE_PATH = os.path.join(BOUNTY_POSTER_ASSETS_PATH, 'image_components', 'texture_name.jpg')
@@ -61,7 +61,9 @@ class WantedPoster:
 
     def generate(self, output_poster_path: str = None, portrait_vertical_align: str = 'center',
                  portrait_horizontal_align: str = 'center', should_make_portrait_transparent: bool = False,
-                 portrait_transparency_value: int = 200) -> str:
+                 portrait_transparency_value: int = 200,
+                 full_name_max_length: Union[int, None] = BOUNTY_POSTER_NAME_OPTIMAL_MAX_LENGTH,
+                 use_space_sub: bool = True) -> str:
         """
         Generates a wanted poster and saves it to the specified path
         :param output_poster_path: The path to the output poster. If None, a temporary file will be created
@@ -69,6 +71,8 @@ class WantedPoster:
         :param portrait_horizontal_align: The horizontal alignment of the portrait image (left, center, right)
         :param should_make_portrait_transparent: Whether to make the portrait semi-transparent
         :param portrait_transparency_value: The transparency value of the portrait (0-255). Higher = less transparent
+        :param full_name_max_length: The maximum length of the full name. If None, no limit
+        :param use_space_sub: Whether to use the space substitution character (•) if the name is too long or D. in name
         :return: The path to the generated poster
         """
 
@@ -121,7 +125,7 @@ class WantedPoster:
         new_image.paste(poster_template, (0, 0), mask=poster_template)
 
         # Add name component
-        full_name = self.__get_bounty_poster_name()
+        full_name = self.__get_bounty_poster_name(full_name_max_length, use_space_sub)
         name_component: Image = self.__get_bounty_poster_component(full_name, BOUNTY_POSTER_COMPONENT_NAME)
         new_image.paste(name_component, (0, BOUNTY_POSTER_NAME_START_Y), name_component)
 
@@ -205,20 +209,24 @@ class WantedPoster:
 
         return portrait
 
-    def __get_bounty_poster_name(self) -> str:
+    def __get_bounty_poster_name(self, max_length: Union[int, None], use_space_sub) -> str:
         """
         Gets the bounty poster's name of a user
+        :param max_length: The maximum length of the name
+        :param use_space_sub: Whether to use the space substitution character (•) if the name is too long or D. in name
+        :return: The bounty poster's name of a user
         """
 
         # Get full name
-        full_name = self.__get_full_name()
+        full_name = self.__get_full_name(max_length)
 
         # Add space sub if too long or D. in name
-        if len(full_name) >= BOUNTY_POSTER_NAME_SPACE_SUB_MIN_LENGTH or 'D.' in full_name:
-            full_name = full_name.replace(' ', BOUNTY_POSTER_NAME_SPACE_SUB_CHAR)
+        if use_space_sub:
+            if len(full_name) >= BOUNTY_POSTER_NAME_SPACE_SUB_MIN_LENGTH or 'D.' in full_name:
+                full_name = full_name.replace(' ', BOUNTY_POSTER_NAME_SPACE_SUB_CHAR)
 
-        # Replace 'D.' with 'D'
-        full_name = full_name.replace('D.', 'D')
+            # Replace 'D.' with 'D'
+            full_name = full_name.replace('D.', 'D')
 
         return full_name
 
@@ -302,39 +310,40 @@ class WantedPoster:
 
         return texture_background
 
-    def __get_full_name(self) -> str:
+    def __get_full_name(self, max_length: Union[int, None]) -> str:
         """
         Preprocesses the name to be up to a maximum length
+        :param max_length: The maximum length of the name
         :return: The full name
         """
 
-        # Normalize to ascii
+        # Normalize to ascii, for non latin characters
         first_name = unidecode(self.first_name).upper().strip()
         last_name = unidecode(self.last_name).upper().strip()
 
         full_name = f'{last_name} {first_name}'
 
-        if len(full_name) <= BOUNTY_POSTER_NAME_MAX_LENGTH:
+        if max_length is None or len(full_name) <= max_length:
             return full_name
 
         # Use first name only
         full_name = first_name
-        if len(full_name) <= BOUNTY_POSTER_NAME_MAX_LENGTH:
+        if len(full_name) <= max_length:
             return full_name
 
         # Still too long, split by 'space' and concatenate till it's not too long
         parts = full_name.split(' ')
         result = ''
         for part in parts:
-            if len(result + ' ' + part) > BOUNTY_POSTER_NAME_MAX_LENGTH:
+            if len(result + ' ' + part) > max_length:
                 return full_name
             result += ' ' + part
 
         # Use result or only the first part
         full_name = parts[0] if len(result) == 0 else result
-        if len(full_name) <= BOUNTY_POSTER_NAME_MAX_LENGTH:
+        if len(full_name) <= max_length:
             return full_name
 
         # Still too long, remove extra characters
-        full_name = full_name[:(BOUNTY_POSTER_NAME_MAX_LENGTH - 2)] + '.'
+        full_name = full_name[:(max_length - 2)] + '.'
         return full_name
