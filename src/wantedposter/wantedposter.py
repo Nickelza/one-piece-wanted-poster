@@ -1,5 +1,6 @@
 import os
 import uuid
+from enum import Enum
 from io import BytesIO
 from typing import Union, Tuple
 
@@ -42,6 +43,18 @@ BOUNTY_POSTER_COMPONENT_NAME = 1
 BOUNTY_POSTER_COMPONENT_BELLY = 2
 
 
+class HorizontalAlignment(Enum):
+    LEFT = 'left'
+    CENTER = 'center'
+    RIGHT = 'right'
+
+
+class VerticalAlignment(Enum):
+    TOP = 'top'
+    CENTER = 'center'
+    BOTTOM = 'bottom'
+
+
 class WantedPoster:
     def __init__(self, portrait: Union[str, BytesIO] = None, first_name: str = '', last_name: str = '', bounty: int = 0
                  ) -> None:
@@ -59,16 +72,18 @@ class WantedPoster:
         self.last_name: str = last_name
         self.bounty: int = bounty
 
-    def generate(self, output_poster_path: str = None, portrait_vertical_align: str = 'center',
-                 portrait_horizontal_align: str = 'center', should_make_portrait_transparent: bool = False,
+    def generate(self, output_poster_path: str = None,
+                 portrait_horizontal_align: HorizontalAlignment = HorizontalAlignment.CENTER,
+                 portrait_vertical_align: VerticalAlignment = VerticalAlignment.CENTER,
+                 should_make_portrait_transparent: bool = False,
                  portrait_transparency_value: int = 200,
                  full_name_max_length: Union[int, None] = BOUNTY_POSTER_NAME_OPTIMAL_MAX_LENGTH,
                  use_space_sub: bool = True) -> str:
         """
         Generates a wanted poster and saves it to the specified path
         :param output_poster_path: The path to the output poster. If None, a temporary file will be created
-        :param portrait_vertical_align: The vertical alignment of the portrait image (top, center, bottom)
-        :param portrait_horizontal_align: The horizontal alignment of the portrait image (left, center, right)
+        :param portrait_vertical_align: The vertical alignment of the portrait image
+        :param portrait_horizontal_align: The horizontal alignment of the portrait image
         :param should_make_portrait_transparent: Whether to make the portrait semi-transparent
         :param portrait_transparency_value: The transparency value of the portrait (0-255). Higher = less transparent
         :param full_name_max_length: The maximum length of the full name. If None, no limit
@@ -80,17 +95,11 @@ class WantedPoster:
         if output_poster_path is None:
             output_poster_path = uuid.uuid4().hex + '.jpg'
 
-        if portrait_vertical_align not in ["top", "center", "bottom"]:
-            raise ValueError("Invalid vertical_align value")
-
-        if portrait_horizontal_align not in ["left", "center", "right"]:
-            raise ValueError("Invalid horizontal_align value")
-
         # Set portrait image
         if self.portrait is None:
             portrait = BOUNTY_POSTER_NO_PHOTO_PATH
-            portrait_vertical_align = "center"
-            portrait_horizontal_align = "center"
+            portrait_vertical_align = VerticalAlignment.CENTER
+            portrait_horizontal_align = HorizontalAlignment.CENTER
         else:
             portrait = self.portrait
 
@@ -141,12 +150,13 @@ class WantedPoster:
         return save_path
 
     @staticmethod
-    def __align_image(portrait: Image, vertical_align: str, horizontal_align: str) -> Tuple[int, int]:
+    def __align_image(portrait: Image, vertical_align: VerticalAlignment, horizontal_align: HorizontalAlignment
+                      ) -> Tuple[int, int]:
         """
         Calculate the portrait's coordinate based on the desired alignment
         :param portrait: Image to align
-        :param vertical_align: The vertical alignment of the portrait image (top, center, bottom)
-        :param horizontal_align: The horizontal alignment of the portrait image (left, center, right)
+        :param vertical_align: The vertical alignment of the portrait image
+        :param horizontal_align: The horizontal alignment of the portrait image
         :return: The portrait's start coordinate
         """
 
@@ -154,19 +164,19 @@ class WantedPoster:
         portrait_width, portrait_height = portrait.size
 
         # Calculate the portrait's x coordinate based on the desired alignment
-        if horizontal_align == "left":
+        if horizontal_align is HorizontalAlignment.LEFT:
             portrait_x = BOUNTY_POSTER_PORTRAIT_BOX_START_X
-        elif horizontal_align == "center":
+        elif horizontal_align is HorizontalAlignment.CENTER:
             portrait_x = int((BOUNTY_POSTER_PORTRAIT_BOX_W - portrait_width) / 2) + BOUNTY_POSTER_PORTRAIT_BOX_START_X
-        else:  # right
+        else:  # Right
             portrait_x = BOUNTY_POSTER_PORTRAIT_BOX_W - portrait_width + BOUNTY_POSTER_PORTRAIT_BOX_START_X
 
         # Adjust the portrait's y coordinate based on the desired alignment
-        if vertical_align == "top":
+        if vertical_align is VerticalAlignment.TOP:
             portrait_y = BOUNTY_POSTER_PORTRAIT_BOX_START_Y
-        elif vertical_align == "center":
+        elif vertical_align is VerticalAlignment.CENTER:
             portrait_y = int((BOUNTY_POSTER_PORTRAIT_BOX_H - portrait_height) / 2) + BOUNTY_POSTER_PORTRAIT_BOX_START_Y
-        else:  # bottom
+        else:  # Bottom
             portrait_y = BOUNTY_POSTER_PORTRAIT_BOX_H - portrait_height + BOUNTY_POSTER_PORTRAIT_BOX_START_Y
 
         return portrait_x, portrait_y
