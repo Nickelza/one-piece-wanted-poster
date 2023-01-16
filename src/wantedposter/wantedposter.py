@@ -18,6 +18,12 @@ BOUNTY_POSTER_PORTRAIT_BOX_START_X = 73
 BOUNTY_POSTER_PORTRAIT_BOX_W = 640
 BOUNTY_POSTER_PORTRAIT_TEXTURE_PATH = os.path.join(BOUNTY_POSTER_ASSETS_PATH, 'image_components',
                                                    'texture_portrait.jpg')
+BOUNTY_POSTER_CAPTURE_CONDITION_DEAD_OR_ALIVE_PATH = os.path.join(BOUNTY_POSTER_ASSETS_PATH, 'image_components',
+                                                                  'dead_or_alive.jpg')
+BOUNTY_POSTER_CAPTURE_CONDITION_ONLY_DEAD_PATH = os.path.join(BOUNTY_POSTER_ASSETS_PATH, 'image_components',
+                                                              'only_dead.jpg')
+BOUNTY_POSTER_CAPTURE_CONDITION_ONLY_ALIVE_PATH = os.path.join(BOUNTY_POSTER_ASSETS_PATH, 'image_components',
+                                                               'only_alive.jpg')
 BOUNTY_POSTER_NAME_FONT_SIZE = 150
 BOUNTY_POSTER_NAME_MAX_W = 595
 BOUNTY_POSTER_NAME_H = 109
@@ -41,6 +47,8 @@ BOUNTY_POSTER_BELLY_TEXTURE_PATH = os.path.join(BOUNTY_POSTER_ASSETS_PATH, 'imag
 BOUNTY_POSTER_BELLY_FONT_PATH = os.path.join(BOUNTY_POSTER_ASSETS_PATH, 'fonts', 'Lilly__.ttf')
 BOUNTY_POSTER_COMPONENT_NAME = 1
 BOUNTY_POSTER_COMPONENT_BELLY = 2
+BOUNTY_POSTER_CAPTURE_CONDITION_START_X = 0
+BOUNTY_POSTER_CAPTURE_CONDITION_START_Y = 724
 
 
 class HorizontalAlignment(Enum):
@@ -53,6 +61,12 @@ class VerticalAlignment(Enum):
     TOP = 'top'
     CENTER = 'center'
     BOTTOM = 'bottom'
+
+
+class CaptureCondition(Enum):
+    DEAD_OR_ALIVE = 'dead_or_alive'
+    ONLY_DEAD = 'only_dead'
+    ONLY_ALIVE = 'only_alive'
 
 
 class WantedPoster:
@@ -78,7 +92,8 @@ class WantedPoster:
                  should_make_portrait_transparent: bool = False,
                  portrait_transparency_value: int = 200,
                  full_name_max_length: Union[int, None] = BOUNTY_POSTER_NAME_OPTIMAL_MAX_LENGTH,
-                 use_space_sub: bool = True) -> str:
+                 use_space_sub: bool = True,
+                 capture_condition: CaptureCondition = CaptureCondition.DEAD_OR_ALIVE) -> str:
         """
         Generates a wanted poster and saves it to the specified path
         :param output_poster_path: The path to the output poster. If None, a temporary file will be created
@@ -88,6 +103,7 @@ class WantedPoster:
         :param portrait_transparency_value: The transparency value of the portrait (0-255). Higher = less transparent
         :param full_name_max_length: The maximum length of the full name. If None, no limit
         :param use_space_sub: Whether to use the space substitution character (•) if the name is too long or D. in name
+        :param capture_condition: The capture condition to display on the poster
         :return: The path to the generated poster
         """
 
@@ -95,13 +111,21 @@ class WantedPoster:
         if output_poster_path is None:
             output_poster_path = uuid.uuid4().hex + '.jpg'
 
-        # Set portrait image
+        # Get portrait image
         if self.portrait is None:
             portrait = BOUNTY_POSTER_NO_PHOTO_PATH
             portrait_vertical_align = VerticalAlignment.CENTER
             portrait_horizontal_align = HorizontalAlignment.CENTER
         else:
             portrait = self.portrait
+
+        # Get capture condition image
+        if capture_condition is CaptureCondition.ONLY_DEAD:
+            capture_condition_image_path = BOUNTY_POSTER_CAPTURE_CONDITION_ONLY_DEAD_PATH
+        elif capture_condition is CaptureCondition.ONLY_ALIVE:
+            capture_condition_image_path = BOUNTY_POSTER_CAPTURE_CONDITION_ONLY_ALIVE_PATH
+        else:
+            capture_condition_image_path = BOUNTY_POSTER_CAPTURE_CONDITION_DEAD_OR_ALIVE_PATH
 
         # Open poster template
         poster_template = Image.open(BOUNTY_POSTER_TEMPLATE_PATH).convert("RGBA")
@@ -130,8 +154,13 @@ class WantedPoster:
             mask = None
         new_image.paste(portrait, (portrait_coordinate_x, portrait_coordinate_y), mask)
 
-        # Paste poster template into the new image
+        # Paste poster template onto the new image
         new_image.paste(poster_template, (0, 0), mask=poster_template)
+
+        # Add capture condition component
+        capture_condition_image = Image.open(capture_condition_image_path)
+        new_image.paste(capture_condition_image, (BOUNTY_POSTER_CAPTURE_CONDITION_START_X,
+                                                  BOUNTY_POSTER_CAPTURE_CONDITION_START_Y))
 
         # Add name component
         full_name = self.__get_bounty_poster_name(full_name_max_length, use_space_sub)
