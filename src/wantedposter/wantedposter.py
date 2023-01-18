@@ -116,6 +116,7 @@ class WantedPoster:
             portrait = BOUNTY_POSTER_NO_PHOTO_PATH
             portrait_vertical_align = VerticalAlignment.CENTER
             portrait_horizontal_align = HorizontalAlignment.CENTER
+            should_make_portrait_transparent = False
         else:
             portrait = self.portrait
 
