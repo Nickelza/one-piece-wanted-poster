@@ -52,21 +52,21 @@ BOUNTY_POSTER_CAPTURE_CONDITION_START_Y = 724
 
 
 class HorizontalAlignment(Enum):
-    LEFT = 'left'
-    CENTER = 'center'
-    RIGHT = 'right'
+    LEFT = 'LEFT'
+    CENTER = 'CENTER'
+    RIGHT = 'RIGHT'
 
 
 class VerticalAlignment(Enum):
-    TOP = 'top'
-    CENTER = 'center'
-    BOTTOM = 'bottom'
+    TOP = 'TOP'
+    CENTER = 'CENTER'
+    BOTTOM = 'BOTTOM'
 
 
 class CaptureCondition(Enum):
-    DEAD_OR_ALIVE = 'dead_or_alive'
-    ONLY_DEAD = 'only_dead'
-    ONLY_ALIVE = 'only_alive'
+    DEAD_OR_ALIVE = 'DEAD_OR_ALIVE'
+    ONLY_DEAD = 'ONLY_DEAD'
+    ONLY_ALIVE = 'ONLY_ALIVE'
 
 
 class WantedPoster:
