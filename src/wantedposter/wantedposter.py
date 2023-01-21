@@ -82,8 +82,8 @@ class WantedPoster:
         """
 
         self.portrait: str = portrait
-        self.first_name: str = first_name
-        self.last_name: str = last_name
+        self.first_name: str = first_name if first_name is not None else ''
+        self.last_name: str = last_name if last_name is not None else ''
         self.bounty: int = bounty
 
     def generate(self, output_poster_path: str = None,
