@@ -361,7 +361,7 @@ class WantedPoster:
         first_name = unidecode(self.first_name).upper().strip()
         last_name = unidecode(self.last_name).upper().strip()
 
-        full_name = f'{last_name} {first_name}'
+        full_name = f'{last_name} {first_name}'.strip()
 
         if max_length is None or len(full_name) <= max_length:
             return full_name
