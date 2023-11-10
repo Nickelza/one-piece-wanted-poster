@@ -24,6 +24,8 @@ BOUNTY_POSTER_CAPTURE_CONDITION_ONLY_DEAD_PATH = os.path.join(BOUNTY_POSTER_ASSE
                                                               'only_dead.jpg')
 BOUNTY_POSTER_CAPTURE_CONDITION_ONLY_ALIVE_PATH = os.path.join(BOUNTY_POSTER_ASSETS_PATH, 'image_components',
                                                                'only_alive.jpg')
+BOUNTY_POSTER_FROST_EFFECT_PATH = os.path.join(BOUNTY_POSTER_ASSETS_PATH, 'image_components', 'effect_frost.png')
+BOUNTY_POSTER_STAMP_WARLORD = os.path.join(BOUNTY_POSTER_ASSETS_PATH, 'image_components', 'stamp_warlord.png')
 BOUNTY_POSTER_NAME_FONT_SIZE = 150
 BOUNTY_POSTER_NAME_MAX_W = 595
 BOUNTY_POSTER_NAME_H = 109
@@ -49,6 +51,8 @@ BOUNTY_POSTER_COMPONENT_NAME = 1
 BOUNTY_POSTER_COMPONENT_BELLY = 2
 BOUNTY_POSTER_CAPTURE_CONDITION_START_X = 0
 BOUNTY_POSTER_CAPTURE_CONDITION_START_Y = 724
+BOUNTY_POSTER_STAMP_START_X = 0
+BOUNTY_POSTER_STAMP_START_Y = 120
 
 
 class HorizontalAlignment(Enum):
@@ -67,6 +71,23 @@ class CaptureCondition(Enum):
     DEAD_OR_ALIVE = 'DEAD_OR_ALIVE'
     ONLY_DEAD = 'ONLY_DEAD'
     ONLY_ALIVE = 'ONLY_ALIVE'
+
+
+class Effect(Enum):
+    FROST = 'FROST'
+
+
+class Stamp(Enum):
+    WARLORD = 'WARLORD'
+
+
+EFFECT_IMAGE_PATHS = {
+    Effect.FROST: BOUNTY_POSTER_FROST_EFFECT_PATH
+}
+
+STAMP_IMAGE_PATHS = {
+    Stamp.WARLORD: BOUNTY_POSTER_STAMP_WARLORD
+}
 
 
 class WantedPoster:
@@ -93,7 +114,8 @@ class WantedPoster:
                  portrait_transparency_value: int = 200,
                  full_name_max_length: Union[int, None] = BOUNTY_POSTER_NAME_OPTIMAL_MAX_LENGTH,
                  use_space_sub: bool = True,
-                 capture_condition: CaptureCondition = CaptureCondition.DEAD_OR_ALIVE) -> str:
+                 capture_condition: CaptureCondition = CaptureCondition.DEAD_OR_ALIVE,
+                 effects: list[Effect] = None, stamp: Stamp = None) -> str:
         """
         Generates a wanted poster and saves it to the specified path
         :param output_poster_path: The path to the output poster. If None, a temporary file will be created
@@ -104,12 +126,17 @@ class WantedPoster:
         :param full_name_max_length: The maximum length of the full name. If None, no limit
         :param use_space_sub: Whether to use the space substitution character (•) if the name is too long or D. in name
         :param capture_condition: The capture condition to display on the poster
+        :param effects: The effects to apply to the poster
+        :param stamp: The stamp to apply to the poster
         :return: The path to the generated poster
         """
 
         # If output path is not specified, use a temporary file
         if output_poster_path is None:
             output_poster_path = uuid.uuid4().hex + '.jpg'
+
+        if effects is None:
+            effects = []
 
         # Get portrait image
         if self.portrait is None:
@@ -172,6 +199,16 @@ class WantedPoster:
         belly = '{0:,}'.format(self.bounty) + '-'
         belly_component: Image = self.__get_bounty_poster_component(belly, BOUNTY_POSTER_COMPONENT_BELLY)
         new_image.paste(belly_component, (0, BOUNTY_POSTER_BELLY_START_Y), belly_component)
+
+        # Add stamp
+        if stamp is not None:
+            stamp_image = Image.open(STAMP_IMAGE_PATHS[stamp])
+            new_image.paste(stamp_image, (BOUNTY_POSTER_STAMP_START_X, BOUNTY_POSTER_STAMP_START_Y), mask=stamp_image)
+
+        # Add effects
+        for effect in effects:
+            effect_image = Image.open(EFFECT_IMAGE_PATHS[effect]).convert("RGBA")
+            new_image.paste(effect_image, (0, 0), mask=effect_image)
 
         # Save image
         save_path = output_poster_path
