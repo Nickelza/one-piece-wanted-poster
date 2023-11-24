@@ -24,7 +24,9 @@ BOUNTY_POSTER_CAPTURE_CONDITION_ONLY_DEAD_PATH = os.path.join(BOUNTY_POSTER_ASSE
                                                               'only_dead.jpg')
 BOUNTY_POSTER_CAPTURE_CONDITION_ONLY_ALIVE_PATH = os.path.join(BOUNTY_POSTER_ASSETS_PATH, 'image_components',
                                                                'only_alive.jpg')
-BOUNTY_POSTER_FROST_EFFECT_PATH = os.path.join(BOUNTY_POSTER_ASSETS_PATH, 'image_components', 'effect_frost.png')
+BOUNTY_POSTER_EFFECT_FROST_PATH = os.path.join(BOUNTY_POSTER_ASSETS_PATH, 'image_components', 'effect_frost.png')
+BOUNTY_POSTER_LIGHTNING_EFFECT_PATH = os.path.join(BOUNTY_POSTER_ASSETS_PATH, 'image_components',
+                                                   'effect_lightning.png')
 BOUNTY_POSTER_STAMP_WARLORD = os.path.join(BOUNTY_POSTER_ASSETS_PATH, 'image_components', 'stamp_warlord.png')
 BOUNTY_POSTER_STAMP_DO_NOT_ENGAGE = os.path.join(BOUNTY_POSTER_ASSETS_PATH, 'image_components',
                                                  'stamp_do_not_engage.png')
@@ -79,6 +81,7 @@ class CaptureCondition(Enum):
 
 class Effect(Enum):
     FROST = 'FROST'
+    LIGHTNING = 'LIGHTNING'
 
 
 class Stamp(Enum):
@@ -88,7 +91,8 @@ class Stamp(Enum):
 
 
 EFFECT_IMAGE_PATHS = {
-    Effect.FROST: BOUNTY_POSTER_FROST_EFFECT_PATH
+    Effect.FROST: BOUNTY_POSTER_EFFECT_FROST_PATH,
+    Effect.LIGHTNING: BOUNTY_POSTER_LIGHTNING_EFFECT_PATH
 }
 
 STAMP_IMAGE_PATHS = {
