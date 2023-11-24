@@ -26,6 +26,10 @@ BOUNTY_POSTER_CAPTURE_CONDITION_ONLY_ALIVE_PATH = os.path.join(BOUNTY_POSTER_ASS
                                                                'only_alive.jpg')
 BOUNTY_POSTER_FROST_EFFECT_PATH = os.path.join(BOUNTY_POSTER_ASSETS_PATH, 'image_components', 'effect_frost.png')
 BOUNTY_POSTER_STAMP_WARLORD = os.path.join(BOUNTY_POSTER_ASSETS_PATH, 'image_components', 'stamp_warlord.png')
+BOUNTY_POSTER_STAMP_DO_NOT_ENGAGE = os.path.join(BOUNTY_POSTER_ASSETS_PATH, 'image_components',
+                                                 'stamp_do_not_engage.png')
+BOUNTY_POSTER_STAMP_FLEE_ON_SIGHT = os.path.join(BOUNTY_POSTER_ASSETS_PATH, 'image_components',
+                                                 'stamp_flee_on_sight.png')
 BOUNTY_POSTER_NAME_FONT_SIZE = 150
 BOUNTY_POSTER_NAME_MAX_W = 595
 BOUNTY_POSTER_NAME_H = 109
@@ -79,6 +83,8 @@ class Effect(Enum):
 
 class Stamp(Enum):
     WARLORD = 'WARLORD'
+    DO_NOT_ENGAGE = 'DO_NOT_ENGAGE'
+    FLEE_ON_SIGHT = 'FLEE_ON_SIGHT'
 
 
 EFFECT_IMAGE_PATHS = {
@@ -86,7 +92,9 @@ EFFECT_IMAGE_PATHS = {
 }
 
 STAMP_IMAGE_PATHS = {
-    Stamp.WARLORD: BOUNTY_POSTER_STAMP_WARLORD
+    Stamp.WARLORD: BOUNTY_POSTER_STAMP_WARLORD,
+    Stamp.DO_NOT_ENGAGE: BOUNTY_POSTER_STAMP_DO_NOT_ENGAGE,
+    Stamp.FLEE_ON_SIGHT: BOUNTY_POSTER_STAMP_FLEE_ON_SIGHT
 }
 
 
