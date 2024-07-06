@@ -295,7 +295,7 @@ class WantedPoster:
             new_height = BOUNTY_POSTER_PORTRAIT_BOX_H
 
         # Resize portrait
-        portrait = portrait.resize((new_width, new_height), Image.ANTIALIAS)
+        portrait = portrait.resize((new_width, new_height), Image.Resampling.LANCZOS)
 
         return portrait
 
@@ -360,7 +360,7 @@ class WantedPoster:
 
         # Get text size
         should_scale: bool = False
-        text_w, text_h = draw.textsize(text, font=font)
+        text_w = draw.textlength(text, font=font)
 
         if text_w < max_w:
             width_difference = max_w - text_w
@@ -377,7 +377,7 @@ class WantedPoster:
             # Draw char by char considering kerning
             for char in text:
                 draw.text((x_pos, box_h), char, font=font, fill='white', anchor='ls')
-                char_width, letter_height = draw.textsize(char, font=font)
+                char_width = draw.textlength(char, font=font)
                 x_pos += char_width + kern
         else:
             # If width is too big, increase alpha channel width
