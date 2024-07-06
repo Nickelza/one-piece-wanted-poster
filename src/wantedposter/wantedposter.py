@@ -1,5 +1,6 @@
 import os
 import uuid
+from datetime import datetime
 from enum import Enum
 from io import BytesIO
 from typing import Union, Tuple
@@ -143,9 +144,9 @@ class WantedPoster:
         :return: The path to the generated poster
         """
 
-        # If output path is not specified, use a temporary file
+        # If output path is not specified, use current timestamp in "yyyyMMddHHmmss" format + random uuid
         if output_poster_path is None:
-            output_poster_path = uuid.uuid4().hex + '.jpg'
+            output_poster_path = f"{datetime.now().strftime('%Y%m%d%H%M%S')}_{uuid.uuid4().hex}.jpg"
 
         if effects is None:
             effects = []
